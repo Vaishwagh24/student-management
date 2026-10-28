@@ -47,8 +47,127 @@
       <label for="anyfile">Photo</label>
       <input type="file" id="anyfile" name="anyfile" accept="image/*">
 
-      <button type="submit">Submit</button>
+      <button type="submit">Submit Form</button>
     </form>
   </div>
+<!-- Student dashboard -->
+    <section class="card dashboard">
+      <h1>Student Dashboard</h1>
+
+      <div class="stats">
+        <div class="stat"><span id="stat-total">0</span><small>Total students</small></div>
+        <div class="stat"><span id="stat-month">0</span><small>Joined this month</small></div>
+        <div class="stat"><span id="stat-courses">0</span><small>Courses in use</small></div>
+      </div>
+
+      <h2>Students by course</h2>
+      <div id="course-bars" class="bars"></div>
+
+      <h2>All students</h2>
+      <input type="search" id="search" placeholder="Search by name, email or course">
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr><th>Photo</th><th>Name</th><th>Email</th><th>Course</th><th>Joined</th></tr>
+          </thead>
+          <tbody id="student-rows">
+            <tr><td colspan="5" class="muted">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    let students = [];
+
+    const $ = (id) => document.getElementById(id);
+
+    function cell(text) {
+      const td = document.createElement("td");
+      td.textContent = text || "";
+      return td;
+    }
+
+    function renderStats() {
+      const now = new Date();
+      const thisMonth = students.filter(s => {
+        const d = new Date(s.created_at);
+        return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+      }).length;
+
+      const counts = {};
+      students.forEach(s => counts[s.course] = (counts[s.course] || 0) + 1);
+
+      $("stat-total").textContent = students.length;
+      $("stat-month").textContent = thisMonth;
+      $("stat-courses").textContent = Object.keys(counts).length;
+
+      const bars = $("course-bars");
+      bars.innerHTML = "";
+      const max = Math.max(1, ...Object.values(counts));
+      Object.entries(counts).forEach(([course, n]) => {
+        const row = document.createElement("div");
+        row.className = "bar-row";
+
+        const label = document.createElement("span");
+        label.textContent = course + " (" + n + ")";
+
+        const track = document.createElement("div");
+        track.className = "bar-track";
+        const fill = document.createElement("div");
+        fill.className = "bar-fill";
+        fill.style.width = (n / max * 100) + "%";
+        track.appendChild(fill);
+
+        row.append(label, track);
+        bars.appendChild(row);
+      });
+    }
+
+    function renderTable(list) {
+      const body = $("student-rows");
+      body.innerHTML = "";
+
+      if (!list.length) {
+        body.innerHTML = '<tr><td colspan="5" class="muted">No students found.</td></tr>';
+        return;
+      }
+
+      list.forEach(s => {
+        const tr = document.createElement("tr");
+
+        const photoCell = document.createElement("td");
+        if (s.photo_url) {
+          const img = document.createElement("img");
+          img.src = s.photo_url;
+          img.alt = "";
+          img.className = "thumb";
+          photoCell.appendChild(img);
+        }
+
+        tr.append(photoCell, cell(s.name), cell(s.email), cell(s.course),
+                  cell((s.created_at || "").slice(0, 10)));
+        body.appendChild(tr);
+      });
+    }
+
+    $("search").addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      renderTable(students.filter(s =>
+        [s.name, s.email, s.course].join(" ").toLowerCase().includes(q)
+      ));
+    });
+
+    fetch("students_api.php")
+      .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(data => { students = data; renderStats(); renderTable(students); })
+      .catch(() => {
+        $("student-rows").innerHTML =
+          '<tr><td colspan="5" class="muted">Could not load students. Check students_api.php.</td></tr>';
+      });
+  </script>
 </body>
 </html>
