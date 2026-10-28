@@ -1,2 +1,53 @@
-<h1> This is index page</h1>
-<h1>Welcome</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Management</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Student Registration</h1>
+
+    <form action="upload.php" method="post" enctype="multipart/form-data">
+      <label for="name">Full name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="phone">Phone</label>
+      <input type="tel" id="phone" name="phone" pattern="[0-9]{10}" placeholder="10 digits">
+
+      <label for="dob">Date of birth</label>
+      <input type="date" id="dob" name="dob">
+
+      <label for="gender">Gender</label>
+      <select id="gender" name="gender">
+        <option value="">Select</option>
+        <option>Female</option>
+        <option>Male</option>
+        <option>Other</option>
+      </select>
+
+      <label for="course">Course</label>
+      <select id="course" name="course" required>
+        <option value="">Select</option>
+        <option>Computer Science</option>
+        <option>Electronics</option>
+        <option>Mechanical</option>
+        <option>Commerce</option>
+      </select>
+
+      <label for="address">Address</label>
+      <textarea id="address" name="address" rows="3"></textarea>
+
+      <label for="anyfile">Photo</label>
+      <input type="file" id="anyfile" name="anyfile" accept="image/*">
+
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>
